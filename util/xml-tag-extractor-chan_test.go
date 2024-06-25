@@ -51,6 +51,9 @@ func TestParseXMLChanWithData(t *testing.T) {
 	if err != nil && err != io.EOF {
 		t.Errorf("failed with %v", err)
 	}
+	if writer.Len() < 1 {
+		t.Errorf("no data written, check your source data and query")
+	}
 	fmt.Printf("%s\n", writer.String())
 }
 
