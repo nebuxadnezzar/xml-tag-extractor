@@ -1,0 +1,202 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<CONSOLIDATED_LIST xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://www.un.org/sc/resources/sc-sanctions.xsd' dateGenerated='2024-05-31T00:00:04.378Z'>
+    <INDIVIDUALS>
+        <INDIVIDUAL>
+            <DATAID>110447</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>MUHAMMAD</FIRST_NAME>
+            <SECOND_NAME>TAHER</SECOND_NAME>
+            <THIRD_NAME>ANWARI</THIRD_NAME>
+            <UN_LIST_TYPE>Taliban</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>TAi.005</REFERENCE_NUMBER>
+            <LISTED_ON>2001-02-23</LISTED_ON>
+            <NAME_ORIGINAL_SCRIPT>محمد طاهر أنوري</NAME_ORIGINAL_SCRIPT>
+            <COMMENTS1>Belongs to Andar tribe. Review pursuant to Security Council resolution
+1822 (2008) was concluded on 23 Jul. 2010. INTERPOL-UN Security Council Special Notice web link:https://www.interpol.int/en/How-we-work/Notices/View-UN-Notices-Individuals</COMMENTS1>
+            <TITLE>
+                <VALUE>Mullah</VALUE>
+            </TITLE>
+            <DESIGNATION>
+                <VALUE>a) Director of Administrative Affairs under the Taliban
+regime</VALUE>
+                <VALUE>Minister of Finance under the Taliban regime</VALUE>
+            </DESIGNATION>
+            <NATIONALITY>
+                <VALUE>Afghanistan</VALUE>
+            </NATIONALITY>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE>2003-09-03</VALUE>
+                <VALUE>2007-07-09</VALUE>
+                <VALUE>2007-09-21</VALUE>
+                <VALUE>2011-11-29</VALUE>
+            </LAST_DAY_UPDATED>
+            <INDIVIDUAL_ALIAS>
+                <QUALITY>Good</QUALITY>
+                <ALIAS_NAME>Mohammad Taher Anwari</ALIAS_NAME>
+            </INDIVIDUAL_ALIAS>
+            <INDIVIDUAL_ALIAS>
+                <QUALITY>Good</QUALITY>
+                <ALIAS_NAME>Muhammad Tahir Anwari</ALIAS_NAME>
+            </INDIVIDUAL_ALIAS>
+            <INDIVIDUAL_ALIAS>
+                <QUALITY>Good</QUALITY>
+                <ALIAS_NAME>Mohammad Tahre Anwari</ALIAS_NAME>
+            </INDIVIDUAL_ALIAS>
+            <INDIVIDUAL_ALIAS>
+                <QUALITY>Low</QUALITY>
+                <ALIAS_NAME>Haji Mudir</ALIAS_NAME>
+            </INDIVIDUAL_ALIAS>
+            <INDIVIDUAL_ADDRESS>
+                <COUNTRY/>
+            </INDIVIDUAL_ADDRESS>
+            <INDIVIDUAL_DATE_OF_BIRTH>
+                <TYPE_OF_DATE>APPROXIMATELY</TYPE_OF_DATE>
+                <YEAR>1961</YEAR>
+            </INDIVIDUAL_DATE_OF_BIRTH>
+            <INDIVIDUAL_PLACE_OF_BIRTH>
+                <CITY>Zurmat District</CITY>
+                <STATE_PROVINCE>Paktia Province</STATE_PROVINCE>
+                <COUNTRY>Afghanistan</COUNTRY>
+            </INDIVIDUAL_PLACE_OF_BIRTH>
+            <INDIVIDUAL_DOCUMENT/>
+            <SORT_KEY/>
+            <SORT_KEY_LAST_MOD/>
+        </INDIVIDUAL>
+        <INDIVIDUAL>
+            <DATAID>110554</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>ABDUL LATIF</FIRST_NAME>
+            <SECOND_NAME>MANSUR</SECOND_NAME>
+            <UN_LIST_TYPE>Taliban</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>TAi.007</REFERENCE_NUMBER>
+            <LISTED_ON>2001-01-31</LISTED_ON>
+            <NAME_ORIGINAL_SCRIPT>عبد اللطيف منصور </NAME_ORIGINAL_SCRIPT>
+            <COMMENTS1>Taliban Shadow Governor for Logar Province as of late 2012. Believed to
+be in Afghanistan/Pakistan border area. Belongs to Sahak tribe (Ghilzai). Review
+pursuant to Security Council resolution 1822 (2008) was concluded on 27 Jul.
+2010. INTERPOL-UN Security Council Special Notice web link:https://www.interpol.int/en/How-we-work/Notices/View-UN-Notices-Individuals</COMMENTS1>
+            <TITLE>
+                <VALUE>Maulavi</VALUE>
+            </TITLE>
+            <DESIGNATION>
+                <VALUE>Minister of Agriculture under the Taliban regime</VALUE>
+            </DESIGNATION>
+            <NATIONALITY>
+                <VALUE>Afghanistan</VALUE>
+            </NATIONALITY>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE>2003-09-03</VALUE>
+                <VALUE>2007-07-18</VALUE>
+                <VALUE>2007-09-21</VALUE>
+                <VALUE>2012-02-13</VALUE>
+                <VALUE>2012-05-18</VALUE>
+                <VALUE>2013-04-22</VALUE>
+            </LAST_DAY_UPDATED>
+            <SORT_KEY_LAST_MOD/>
+        </INDIVIDUAL>
+    </INDIVIDUALS>
+    <ENTITIES>
+        <ENTITY>
+            <DATAID>6908726</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>JAMA'A NUSRAT UL-ISLAM WA AL-MUSLIMIN (JNIM)</FIRST_NAME>
+            <UN_LIST_TYPE>Al-Qaida</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>QDe.159</REFERENCE_NUMBER>
+            <LISTED_ON>2018-10-04</LISTED_ON>
+            <NAME_ORIGINAL_SCRIPT>جماعة نصرة الإسلام والمسلمين </NAME_ORIGINAL_SCRIPT>
+            <COMMENTS1>Associated with Al-Qaida (QDe.004), the Organization of Al-Qaida in the Islamic Maghreb (QDe.014), Ansar Eddine (QDe.135) and Al-Mourabitoun (QDe.141). Operations in Mali and Burkina Faso.
+Review pursuant to Security Council resolution 2610 (2021) was concluded on 30 October 2023.
+ INTERPOL-UN Security Council Special Notice web link:https://www.interpol.int/en/How-we-work/Notices/View-UN-Notices-Individuals</COMMENTS1>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE>2023-10-30</VALUE>
+            </LAST_DAY_UPDATED>
+            <ENTITY_ALIAS>
+                <QUALITY/>
+                <ALIAS_NAME/>
+            </ENTITY_ALIAS>
+            <ENTITY_ADDRESS>
+                <COUNTRY/>
+            </ENTITY_ADDRESS>
+            <SORT_KEY/>
+            <SORT_KEY_LAST_MOD/>
+        </ENTITY>
+        <ENTITY>
+            <DATAID>6908657</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>MINISTRY OF NATIONAL DEFENCE </FIRST_NAME>
+            <UN_LIST_TYPE>DPRK</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>KPe.054</REFERENCE_NUMBER>
+            <LISTED_ON>2017-12-22</LISTED_ON>
+            <COMMENTS1>The Ministry of National Defence manages the general administrative and logistical needs of the Korean People’s Army.</COMMENTS1>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE>2024-03-07</VALUE>
+            </LAST_DAY_UPDATED>
+            <ENTITY_ALIAS>
+                <QUALITY>a.k.a.</QUALITY>
+                <ALIAS_NAME>MINISTRY OF NATIONAL DEFENSE</ALIAS_NAME>
+            </ENTITY_ALIAS>
+            <ENTITY_ALIAS>
+                <QUALITY>a.k.a.</QUALITY>
+                <ALIAS_NAME>MINISTRY OF DEFENCE</ALIAS_NAME>
+            </ENTITY_ALIAS>
+            <ENTITY_ALIAS>
+                <QUALITY>a.k.a.</QUALITY>
+                <ALIAS_NAME>MINISTRY OF DEFENSE</ALIAS_NAME>
+            </ENTITY_ALIAS>
+            <ENTITY_ALIAS>
+                <QUALITY>f.k.a.</QUALITY>
+                <ALIAS_NAME>MINISTRY OF THE PEOPLE’S ARMED FORCES (MPAF)</ALIAS_NAME>
+            </ENTITY_ALIAS>
+            <ENTITY_ADDRESS>
+                <CITY>Pyongyang</CITY>
+                <COUNTRY>Democratic People's Republic of Korea</COUNTRY>
+            </ENTITY_ADDRESS>
+            <SORT_KEY/>
+            <SORT_KEY_LAST_MOD/>
+        </ENTITY>
+        <ENTITY>
+            <DATAID>6908523</DATAID>
+            <VERSIONNUM>1</VERSIONNUM>
+            <FIRST_NAME>NATIONAL AEROSPACE TECHNOLOGY ADMINISTRATION</FIRST_NAME>
+            <UN_LIST_TYPE>DPRK</UN_LIST_TYPE>
+            <REFERENCE_NUMBER>KPe.029</REFERENCE_NUMBER>
+            <LISTED_ON>2016-03-02</LISTED_ON>
+            <COMMENTS1>NATA is involved in the DPRK's development of space science and technology, including satellite launches and carrier rockets.</COMMENTS1>
+            <LIST_TYPE>
+                <VALUE>UN List</VALUE>
+            </LIST_TYPE>
+            <LAST_DAY_UPDATED>
+                <VALUE>2024-04-15</VALUE>
+            </LAST_DAY_UPDATED>
+            <ENTITY_ALIAS>
+                <QUALITY>a.k.a.</QUALITY>
+                <ALIAS_NAME>NATA</ALIAS_NAME>
+            </ENTITY_ALIAS>
+            <ENTITY_ALIAS>
+                <QUALITY>f.k.a.</QUALITY>
+                <ALIAS_NAME>NATIONAL AEROSPACE DEVELOPMENT ADMINISTRATION</ALIAS_NAME>
+            </ENTITY_ALIAS>
+            <ENTITY_ALIAS>
+                <QUALITY>f.k.a.</QUALITY>
+                <ALIAS_NAME>NADA</ALIAS_NAME>
+            </ENTITY_ALIAS>
+            <ENTITY_ADDRESS>
+                <COUNTRY>Democratic People's Republic of Korea</COUNTRY>
+            </ENTITY_ADDRESS>
+            <SORT_KEY/>
+            <SORT_KEY_LAST_MOD/>
+        </ENTITY>
+    </ENTITIES>
+</CONSOLIDATED_LIST>
