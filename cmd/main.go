@@ -84,7 +84,7 @@ func run1(filename, path string) (status int) {
 				ch := datachs[i]
 				//print(cnt, " channeling", s)
 				ch <- []byte(s)
-				ch <- []byte{}
+				//ch <- []byte{}
 			}
 		}
 		if err != nil {

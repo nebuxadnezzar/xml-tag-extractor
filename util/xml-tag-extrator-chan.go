@@ -17,6 +17,7 @@ func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserC
 	for {
 		buf, ok := <-datach
 		if !ok {
+			cb(``, EOF)
 			break
 		}
 		cnt++

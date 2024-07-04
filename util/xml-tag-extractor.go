@@ -18,6 +18,7 @@ const (
 	ENDTAG1
 	ENDTAG2
 	ENDDOC
+	EOF
 )
 
 type TagMap map[string]int
