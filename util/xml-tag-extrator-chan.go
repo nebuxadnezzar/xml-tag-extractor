@@ -7,18 +7,20 @@ import (
 
 func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserCallback) (TagMap, error) {
 
-	defer close(errch)
+	//defer close(errch)
 	xb := bytes.NewBuffer(nil) //xml buffer
 	st := NewPrefixstack()
 	writeflag := false
 	tagmap := map[string]int{}
 	path := query + ">"
-
+	cnt := 0
 	for {
 		buf, ok := <-datach
 		if !ok {
 			break
 		}
+		cnt++
+		//fmt.Printf("%05d [%s]\n", cnt, string(buf))
 		n := len(buf)
 		if n > 0 {
 			for i := 0; i < n; i++ {

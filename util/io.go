@@ -1,22 +1,46 @@
 package util
 
 import (
+	"fmt"
 	"io"
 	"os"
 )
 
-func deletetemps(fa []*os.File) {
+func MergeFiles(filenames []string, w io.Writer) (int64, error) {
+	totalbytes := int64(0)
+	var err error
+	for _, name := range filenames {
+		f, e := GetReader(name)
+		if e != nil {
+			err = fmt.Errorf("%w %w", err, e)
+			continue
+		}
+		defer func(ff io.ReadCloser) { ff.Close() }(f)
+		n, e := io.Copy(w, f)
+		if e != nil {
+			err = fmt.Errorf("%w %w", err, e)
+			continue
+		}
+		totalbytes += n
+	}
+	return totalbytes, err
+}
+
+func Deletetemps(fa []*os.File) (err error) {
 	if fa != nil {
 		for i := len(fa); i > 0; i-- {
-			f := fa[i]
+			f := fa[i-1]
 			if f != nil {
-				os.Remove(f.Name())
+				if e := os.Remove(f.Name()); e != nil {
+					err = fmt.Errorf("%w %w", err, e)
+				}
 			}
 		}
 	}
+	return
 }
 
-func createtemps(sz int) (wa []*os.File, err error) {
+func Createtemps(sz int) (wa []*os.File, err error) {
 	wa = make([]*os.File, sz)
 	for i := 0; i < sz; i++ {
 		if f, e := os.CreateTemp(``, `wr*`); e == nil {
@@ -27,7 +51,7 @@ func createtemps(sz int) (wa []*os.File, err error) {
 		}
 	}
 	if err != nil {
-		deletetemps(wa)
+		Deletetemps(wa)
 	}
 	return wa, err
 }

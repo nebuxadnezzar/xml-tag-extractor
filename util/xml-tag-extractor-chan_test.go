@@ -19,8 +19,8 @@ var filedata []byte
 func TestParseXMLChanWithData(t *testing.T) {
 	writer := bytes.NewBuffer(nil)
 	reader := bufio.NewReader(bytes.NewBuffer(filedata))
-	datach := make(chan []byte)
 	query := `CONSOLIDATED_LIST>INDIVIDUALS>INDIVIDUAL`
+	datach := make(chan []byte)
 	errch := make(chan error)
 	endl := []byte{}
 	cb := DefaultCallback(writer)
