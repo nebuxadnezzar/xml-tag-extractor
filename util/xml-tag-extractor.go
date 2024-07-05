@@ -93,6 +93,9 @@ func ParseXML(reader io.Reader, query string, cb ParserCallback) (TagMap, error)
 			if err != io.EOF {
 				return nil, fmt.Errorf("%w", err)
 			}
+			if cb != nil {
+				cb(``, EOF)
+			}
 			break
 		}
 	}

@@ -22,11 +22,41 @@ func main() {
 		path = strings.Replace(os.Args[2], ":", ">", -1)
 	}
 	fmt.Fprintf(os.Stderr, "PATH: %s\n", path)
-	run1(os.Args[1], path)
+	pp := strings.Split(path, ",")
+	filename := os.Args[1]
+	if len(pp) > 1 {
+		run1(filename, pp)
+	} else {
+		run(filename, path)
+	}
 }
 
-func run1(filename, path string) (status int) {
-	pp := strings.Split(path, ",")
+func run(filename, path string) (status int) {
+	reader, err := util.GetReader(filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
+		return 2
+	}
+	defer reader.Close()
+	tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error creating tagmap: %v\n", err)
+		return 3
+	}
+	if path == `` {
+		fmt.Printf("%s", util.TagMapToStr(tagmap))
+	}
+	return 0
+
+}
+
+func run1(filename string, pp []string) (status int) {
+	reader, err := util.GetReader(filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
+		return 2
+	}
+	defer reader.Close()
 
 	wa, err := util.Createtemps(len(pp))
 	defer func() {
@@ -38,12 +68,7 @@ func run1(filename, path string) (status int) {
 		fmt.Fprintf(os.Stderr, "createtemps failed: %v", err)
 		return 1
 	}
-	reader, err := util.GetReader(filename)
-	if err != nil {
-		fmt.Printf("error opening: %s %v\n", os.Args[1], err)
-		return 2
-	}
-	defer reader.Close()
+
 	rd := bufio.NewReader(reader)
 	wg := new(sync.WaitGroup)
 	errch := make(chan error)
@@ -84,7 +109,7 @@ func run1(filename, path string) (status int) {
 				ch := datachs[i]
 				//print(cnt, " channeling", s)
 				ch <- []byte(s)
-				//ch <- []byte{}
+				ch <- []byte{}
 			}
 		}
 		if err != nil {

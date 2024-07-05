@@ -17,11 +17,15 @@ func DefaultCallback(w io.Writer) ParserCallback {
 		if evt == ENDDOC {
 			cnt++
 			if !outtotty {
-				fmt.Fprintf(os.Stderr, "\r%c", progressbytes[cnt%len(progressbytes)])
+				if w == os.Stdout {
+					fmt.Fprintf(os.Stderr, "\rdoc count: %d", cnt)
+				} else {
+					fmt.Fprintf(os.Stderr, "\r%c ", progressbytes[cnt%len(progressbytes)])
+				}
 			}
 			w.Write([]byte{'\n'})
 		}
-		if evt == EOF && !outtotty {
+		if evt == EOF && !outtotty && w != os.Stdout {
 			fmt.Fprintf(os.Stderr, "\n\rdoc count: %d", cnt)
 		}
 		return nil

@@ -28,6 +28,9 @@ func MergeFiles(filenames []string, w io.Writer) (int64, error) {
 
 func Deletetemps(fa []*os.File) (err error) {
 	if fa != nil {
+		if len(fa) == 1 && fa[0] != os.Stdout {
+			return nil
+		}
 		for i := len(fa); i > 0; i-- {
 			f := fa[i-1]
 			if f != nil {
@@ -42,6 +45,10 @@ func Deletetemps(fa []*os.File) (err error) {
 
 func Createtemps(sz int) (wa []*os.File, err error) {
 	wa = make([]*os.File, sz)
+	if sz == 1 {
+		wa[0] = os.Stdout
+		return wa, nil
+	}
 	for i := 0; i < sz; i++ {
 		if f, e := os.CreateTemp(``, `wr*`); e == nil {
 			wa[i] = f
