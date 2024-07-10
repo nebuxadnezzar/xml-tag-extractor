@@ -26,7 +26,7 @@ func DefaultCallback(w io.Writer) ParserCallback {
 			w.Write([]byte{'\n'})
 		}
 		if evt == EOF && !outtotty && w != os.Stdout {
-			fmt.Fprintf(os.Stderr, "\n\rdoc count: %d", cnt)
+			fmt.Fprintf(os.Stderr, "\n\n\rdoc count: %d", cnt)
 		}
 		return nil
 	}

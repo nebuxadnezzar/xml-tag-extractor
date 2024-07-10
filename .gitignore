@@ -17,6 +17,7 @@ dump.txt
 # Dependency directories (remove the comment below to include it)
 vendor/
 dist-*
+todo.txt
 
 # Go workspace file
 go.work

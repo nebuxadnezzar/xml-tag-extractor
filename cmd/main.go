@@ -74,14 +74,14 @@ func run1(filename string, pp []string) (status int) {
 	errch := make(chan error)
 	datachs := make([]chan []byte, len(pp))
 	for i := range datachs {
-		datachs[i] = make(chan []byte)
+		datachs[i] = make(chan []byte, 16)
 	}
 
 	for i, p := range pp {
 		wg.Add(1)
 		go func(path string, ii int, datach chan []byte) {
 			defer wg.Done()
-			println("subpath", path)
+			//println("subpath", path)
 			cb := util.DefaultCallback(wa[ii])
 
 			if tagmap, err := util.ParseXMLChan(datach, errch, path, cb); err == nil {
@@ -140,31 +140,4 @@ func run1(filename string, pp []string) (status int) {
 
 go run cmd/main.go ~/test-data/consolidated.xml CONSOLIDATED_LIST:INDIVIDUALS:INDIVIDUAL,CONSOLIDATED_LIST:ENTITIES:ENTITY >
 
-func run(filename, path string) {
-
-	pp := strings.Split(path, ",")
-
-	wg := new(sync.WaitGroup)
-	for _, p := range pp {
-		wg.Add(1)
-		go func(path string) {
-			defer wg.Done()
-			reader, err := util.GetReader(filename)
-			if err != nil {
-				fmt.Printf("error opening: %s %v\n", os.Args[1], err)
-				os.Exit(2)
-			}
-			defer reader.Close()
-			println("subpath", path)
-			if tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout)); err == nil {
-				if path == `` {
-					fmt.Println(util.TagMapToStr(tagmap))
-				}
-			} else {
-				fmt.Fprintf(os.Stderr, "err: %v\n", err)
-			}
-		}(p)
-	}
-	wg.Wait()
-}
 */

@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"regexp"
+	"unicode"
 )
 
 var (
@@ -66,17 +67,30 @@ func extractattr(b []byte) map[string]string {
 }
 
 func CreateOneLiner(s string) []byte {
+	fmt.Printf("s %s\n", s)
 	b := []byte(s)
 	i := 0
 	for j, k := 0, len(b); i < k && i+j < k; {
-		ch := b[i]
+		offset := i + j
+		ch := b[offset]
+		//fmt.Printf("[%c] ", ch)
 		switch ch {
 		case '\n', '\r':
+			if offset+1 < k {
+				ch := rune(b[offset+1])
+				// if line break is followed by alnum replace it with space (0x20)
+				if unicode.IsLetter(ch) || unicode.IsDigit(ch) {
+					b[offset] = ' '
+					goto SKIP
+				}
+			}
 			j++
 			continue
 		}
-		b[i] = b[i+j]
+	SKIP:
+		b[i] = b[offset]
 		i++
 	}
+	//fmt.Printf("I: %d\n", i)
 	return b[:i]
 }
