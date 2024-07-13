@@ -17,6 +17,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	opts := util.ParseArgs(os.Args[1:])
+	fmt.Fprintf(os.Stderr, "OPTS: %#v\n", opts)
 	path := ""
 	if len(os.Args) > 2 {
 		path = strings.Replace(os.Args[2], ":", ">", -1)

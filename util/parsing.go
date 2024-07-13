@@ -67,7 +67,7 @@ func extractattr(b []byte) map[string]string {
 }
 
 func CreateOneLiner(s string) []byte {
-	fmt.Printf("s %s\n", s)
+	//fmt.Printf("s %s\n", s)
 	b := []byte(s)
 	i := 0
 	for j, k := 0, len(b); i < k && i+j < k; {
