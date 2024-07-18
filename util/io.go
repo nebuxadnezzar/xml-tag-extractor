@@ -64,10 +64,20 @@ func Createtemps(sz int) (wa []*os.File, err error) {
 }
 
 func GetReader(filename string) (io.ReadCloser, error) {
+	if filename == os.Stdin.Name() {
+		return os.Stdin, nil
+	}
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
 
 	return f, nil
+}
+
+func CloseReader(reader io.ReadCloser, name string) error {
+	if name != os.Stdin.Name() {
+		return reader.Close()
+	}
+	return nil
 }

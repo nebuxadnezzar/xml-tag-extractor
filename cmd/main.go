@@ -12,24 +12,31 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s file start-tag", os.Args[0])
-		os.Exit(1)
-	}
 
-	opts := util.ParseArgs(os.Args[1:])
+	opts := util.NewOpts()
+	if len(os.Args) > 1 {
+		opts = util.ParseArgs(os.Args[1:])
+	}
 	fmt.Fprintf(os.Stderr, "OPTS: %#v\n", opts)
+
+	if opts.ShowHelp {
+		showUsageAndExit()
+	}
 	path := ""
-	if len(os.Args) > 2 {
-		path = strings.Replace(os.Args[2], ":", ">", -1)
+	if opts.XMLPaths != `` {
+		path = strings.Replace(opts.XMLPaths, ":", ">", -1)
 	}
 	fmt.Fprintf(os.Stderr, "PATH: %s\n", path)
 	pp := strings.Split(path, ",")
-	filename := os.Args[1]
+
+	filename := os.Stdin.Name()
+	if len(opts.Files) > 0 {
+		filename = opts.Files[0]
+	}
 	if len(pp) > 1 {
-		run1(filename, pp)
+		os.Exit(run1(filename, pp))
 	} else {
-		run(filename, path)
+		os.Exit(run(filename, path))
 	}
 }
 
@@ -39,7 +46,8 @@ func run(filename, path string) (status int) {
 		fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
 		return 2
 	}
-	defer reader.Close()
+	defer util.CloseReader(reader, filename)
+
 	tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error creating tagmap: %v\n", err)
@@ -58,7 +66,7 @@ func run1(filename string, pp []string) (status int) {
 		fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
 		return 2
 	}
-	defer reader.Close()
+	defer util.CloseReader(reader, filename)
 
 	wa, err := util.Createtemps(len(pp))
 	defer func() {
@@ -136,6 +144,11 @@ func run1(filename string, pp []string) (status int) {
 		fmt.Fprintf(os.Stderr, "copy error: %v\n", err)
 	}
 	return 0
+}
+
+func showUsageAndExit() {
+	fmt.Printf("Usage: %s file start-tag", os.Args[0])
+	os.Exit(0)
 }
 
 /*
