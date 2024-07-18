@@ -2,11 +2,14 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/nebuxadnezzar/xml-tag-extractor/util"
 )
@@ -34,13 +37,13 @@ func main() {
 		filename = opts.Files[0]
 	}
 	if len(pp) > 1 {
-		os.Exit(run1(filename, pp))
+		os.Exit(run1(filename, pp, opts))
 	} else {
-		os.Exit(run(filename, path))
+		os.Exit(run(filename, path, opts))
 	}
 }
 
-func run(filename, path string) (status int) {
+func run(filename, path string, opts *util.Options) (status int) {
 	reader, err := util.GetReader(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
@@ -48,11 +51,14 @@ func run(filename, path string) (status int) {
 	}
 	defer util.CloseReader(reader, filename)
 
-	tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout))
+	printHeaderOrFooter(os.Stdout, filepath.Base(filename), opts, true)
+
+	tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout, opts))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error creating tagmap: %v\n", err)
 		return 3
 	}
+	printHeaderOrFooter(os.Stdout, filename, opts, false)
 	if path == `` {
 		fmt.Printf("%s", util.TagMapToStr(tagmap))
 	}
@@ -60,7 +66,7 @@ func run(filename, path string) (status int) {
 
 }
 
-func run1(filename string, pp []string) (status int) {
+func run1(filename string, pp []string, opts *util.Options) (status int) {
 	reader, err := util.GetReader(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
@@ -89,17 +95,17 @@ func run1(filename string, pp []string) (status int) {
 
 	for i, p := range pp {
 		wg.Add(1)
-		go func(path string, ii int, datach chan []byte) {
+		go func(path string, ii int, datach chan []byte, o *util.Options) {
 			defer wg.Done()
 			//println("subpath", path)
-			cb := util.DefaultCallback(wa[ii])
+			cb := util.DefaultCallback(wa[ii], o)
 
 			if tagmap, err := util.ParseXMLChan(datach, errch, path, cb); err == nil {
 				if path == `` {
 					fmt.Println(util.TagMapToStr(tagmap))
 				}
 			}
-		}(p, i, datachs[i])
+		}(p, i, datachs[i], opts)
 	}
 	go func() {
 		for e := range errch {
@@ -138,7 +144,10 @@ func run1(filename string, pp []string) (status int) {
 	for _, w := range wa {
 		tmpnames = append(tmpnames, w.Name())
 	}
+	printHeaderOrFooter(os.Stdout, filepath.Base(filename), opts, true)
 	total, err := util.MergeFiles(tmpnames, os.Stdout)
+	printHeaderOrFooter(os.Stdout, filepath.Base(filename), opts, false)
+
 	fmt.Fprintf(os.Stderr, "\ntotal bytes: %d\n", total)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "copy error: %v\n", err)
@@ -147,8 +156,22 @@ func run1(filename string, pp []string) (status int) {
 }
 
 func showUsageAndExit() {
-	fmt.Printf("Usage: %s file start-tag", os.Args[0])
+	fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] XML-file-path\nOPTIONS:\n", os.Args[0])
+	flag.PrintDefaults()
 	os.Exit(0)
+}
+
+func printHeaderOrFooter(w io.Writer, source string, opts *util.Options, isheader bool) {
+	if opts.RootTagName != `` && opts.XMLPaths != `` {
+		if isheader {
+			w.Write([]byte(fmt.Sprintf("<%s src=\"%s\" ts=\"%s\">\n",
+				opts.RootTagName,
+				source,
+				time.Now().Local().Format(`2006-01-02 15:04:05`))))
+		} else {
+			w.Write([]byte(fmt.Sprintf("\n</%s>", opts.RootTagName)))
+		}
+	}
 }
 
 /*

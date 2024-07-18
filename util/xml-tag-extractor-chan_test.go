@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"testing"
 )
 
@@ -23,8 +24,11 @@ func TestParseXMLChanWithData(t *testing.T) {
 	datach := make(chan []byte)
 	errch := make(chan error)
 	endl := []byte{}
-	cb := DefaultCallback(writer)
-	go func() { ParseXMLChan(datach, errch, query, cb) }()
+	opts := NewOpts()
+	cb := DefaultCallback(writer, opts)
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() { defer wg.Done(); ParseXMLChan(datach, errch, query, cb) }()
 	cnt := 0
 	for {
 		s, err := reader.ReadString('\n')
@@ -39,18 +43,17 @@ func TestParseXMLChanWithData(t *testing.T) {
 	}
 	close(datach)
 
-	var err error
-
-	for {
-		e, ok := <-errch
-		if !ok {
-			break
+	go func() {
+		for e := range errch {
+			fmt.Fprintf(os.Stderr, ">> %v\n", e)
+			if e != nil && e != io.EOF {
+				t.Errorf("failed with %v", e)
+			}
 		}
-		err = fmt.Errorf("%w %w", err, e)
-	}
-	if err != nil && err != io.EOF {
-		t.Errorf("failed with %v", err)
-	}
+		wg.Wait()
+		close(errch)
+	}()
+
 	if writer.Len() < 1 {
 		t.Errorf("no data written, check your source data and query")
 	}
@@ -61,24 +64,21 @@ func TestParseXMLChan(t *testing.T) {
 	xml := "<a>\n<b>hello\n</b>\n</a>"
 	datach := make(chan []byte)
 	errch := make(chan error)
-	cb := DefaultCallback(os.Stdout)
-
-	go func() { ParseXMLChan(datach, errch, "a>b", cb) }()
+	cb := DefaultCallback(os.Stdout, NewOpts())
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() { defer wg.Done(); ParseXMLChan(datach, errch, "a>b", cb) }()
 	datach <- []byte(xml)
 	datach <- []byte{}
 	close(datach)
 
-	var err error
-
-	for {
-		e, ok := <-errch
-		if !ok {
-			break
+	go func() {
+		for e := range errch {
+			if e != nil && e != io.EOF {
+				t.Errorf("failed with %v", e)
+			}
 		}
-		err = fmt.Errorf("%w %w", err, e)
-	}
-	fmt.Printf("ERR: %v\n", err)
-	if err != nil {
-		t.Errorf("%v", err)
-	}
+		wg.Wait()
+		close(errch)
+	}()
 }
