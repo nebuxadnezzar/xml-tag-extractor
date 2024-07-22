@@ -2,7 +2,7 @@ BINARY_NAME=xte
 MAIN_NAME=cmd/main.go
 DIST=./dist
 
-test:
+test-coverage:
 	go test -v -count=1 -coverprofile=cov.out ./...
 	go tool cover -html=cov.out
 
@@ -21,5 +21,9 @@ deps:
 
 clean:
 	@rm -rf ${DIST}*
+	@-rm -f *.pprof *.prof *.test *.out
 
 all: deps build
+
+# utility for printing variables
+print-% : ; @echo $($*)

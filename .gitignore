@@ -8,6 +8,8 @@
 *.so
 *.dylib
 *.swp
+*.prof
+*.pprof
 dump.txt
 # Test binary, built with `go test -c`
 *.test

@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserCallback) (TagMap, error) {
+func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserCallback, nltospace bool) (TagMap, error) {
 
 	//defer close(errch)
 	xb := bytes.NewBuffer(nil) //xml buffer
@@ -27,6 +27,12 @@ func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserC
 			for i := 0; i < n; i++ {
 				b := buf[i]
 				switch b {
+				case '\n', '\r':
+					if nltospace {
+						xb.WriteByte(0x20)
+					} else {
+						xb.WriteByte(b)
+					}
 				case '<':
 					if xb.Len() > 0 {
 						//fmt.Printf("-> %s\n", xb.String())

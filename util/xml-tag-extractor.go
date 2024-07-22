@@ -25,7 +25,7 @@ type TagMap map[string]int
 
 type ParserCallback func(string, EVENT) error
 
-func ParseXML(reader io.Reader, query string, cb ParserCallback) (TagMap, error) {
+func ParseXML(reader io.Reader, query string, cb ParserCallback, nltospace bool) (TagMap, error) {
 
 	buf := make([]byte, 4096)
 	xb := bytes.NewBuffer(nil) //xml buffer
@@ -41,6 +41,12 @@ func ParseXML(reader io.Reader, query string, cb ParserCallback) (TagMap, error)
 			for i := 0; i < n; i++ {
 				b := buf[i]
 				switch b {
+				case '\n', '\r':
+					if nltospace {
+						xb.WriteByte(0x20)
+					} else {
+						xb.WriteByte(b)
+					}
 				case '<':
 					if xb.Len() > 0 {
 						//fmt.Printf("-> %s\n", xb.String())

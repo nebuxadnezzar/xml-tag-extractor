@@ -12,9 +12,10 @@ func DefaultCallback(w io.Writer, opts *Options) ParserCallback {
 	var cnt int
 	o, _ := os.Stdout.Stat()
 	outtotty := (o.Mode()&os.ModeCharDevice) == os.ModeCharDevice || (o.Mode()&os.ModeNamedPipe) == os.ModeNamedPipe
-	oneliner := opts.MakeOneLiner
+	//oneliner := opts.MakeOneLiner
 	return func(s string, evt EVENT) error {
-		w.Write(createoneliner(s, oneliner))
+		//w.Write(createoneliner(s, oneliner))
+		w.Write([]byte(s))
 		if evt == ENDDOC {
 			cnt++
 			if !outtotty {
