@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"unicode"
@@ -53,17 +54,28 @@ func matchendtag(b []byte) matchResult {
 }
 
 func extractattr(b []byte) map[string]string {
-	fmt.Printf("\nEXTRACTING ATTR: %s\n", string(b))
+	//fmt.Printf("\nEXTRACTING ATTR: %s\n", string(b))
 	m := map[string]string{}
-	ma := ATTR.FindSubmatch(b)
-	if len(ma) > 0 {
-
-	}
-	for i, v := range ma {
-		fmt.Printf("A: \t %d %s\n", i, string(v))
+	ma := ATTR.FindAllSubmatch(b, -1)
+	for _, v := range ma {
+		if len(v) > 2 {
+			m[string(v[1])] = string(v[2])
+			//fmt.Printf(" %s ->  %s\n", string(v[1]), string(v[2]))
+		}
 	}
 	return m
 
+}
+
+func maptoxml(m map[string]string) string {
+	if m == nil || len(m) < 1 {
+		return ``
+	}
+	b := bytes.NewBuffer(nil)
+	for k, v := range m {
+		b.WriteString(fmt.Sprintf(`<%s>%s</%s>`, k, v, k))
+	}
+	return b.String()
 }
 
 func CreateOneLiner(s string) []byte {

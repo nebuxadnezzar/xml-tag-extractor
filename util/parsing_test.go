@@ -16,13 +16,27 @@ func TestCreateOneLiner(t *testing.T) {
 	}
 }
 
+func TestExtractAttr(t *testing.T) {
+	m := extractattr([]byte(xml))
+	t.Logf("%v\n", m)
+	if len(m) != 4 {
+		t.Errorf("expected 4 values map, got %v", m)
+	}
+
+	xml := maptoxml(m)
+	t.Logf("%v\n", xml)
+	if xml == `` {
+		t.Error("expected XML string")
+	}
+}
+
 var xml = `
 <root>
-    <greetings>hello</greetings>
+    <greetings idd="456">hello</greetings>
     <greetings>good bye!
 bye bye! <times>3</times>
     </greetings>
-    <greetings id="123"/>
+    <greetings id="123" msg="hello" secret="007"/>
     <smiles>wide</smiles>
 </root>
 

@@ -54,7 +54,7 @@ func run(filename, path string, opts *util.Options) (status int) {
 
 	printHeaderOrFooter(os.Stdout, filepath.Base(filename), opts, true)
 
-	tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout, opts), opts.MakeOneLiner)
+	tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout, opts), opts)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error creating tagmap: %v\n", err)
 		return 3
@@ -101,7 +101,7 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 			//println("subpath", path)
 			cb := util.DefaultCallback(wa[ii], o)
 
-			if tagmap, err := util.ParseXMLChan(datach, errch, path, cb, opts.MakeOneLiner); err == nil {
+			if tagmap, err := util.ParseXMLChan(datach, errch, path, cb, opts); err == nil {
 				if path == `` {
 					fmt.Println(util.TagMapToStr(tagmap))
 				}

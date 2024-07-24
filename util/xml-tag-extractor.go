@@ -25,8 +25,8 @@ type TagMap map[string]int
 
 type ParserCallback func(string, EVENT) error
 
-func ParseXML(reader io.Reader, query string, cb ParserCallback, nltospace bool) (TagMap, error) {
-
+func ParseXML(reader io.Reader, query string, cb ParserCallback, opts *Options) (TagMap, error) {
+	nltospace := opts.MakeOneLiner
 	buf := make([]byte, 4096)
 	xb := bytes.NewBuffer(nil) //xml buffer
 	st := NewPrefixstack()
@@ -84,10 +84,17 @@ func ParseXML(reader io.Reader, query string, cb ParserCallback, nltospace bool)
 
 					//fmt.Printf("STACK: %s %v\n", st.String(), writeflag)
 					if writeflag && cb != nil {
-						cb(xb.String(), mr.event)
-						//if mr.event == MID || mr.event == ENDTAG1 {
-						//	extractattr(xb.Bytes())
-						//}
+						if !opts.AttributesToElements || mr.event == ENDDOC {
+							cb(xb.String(), mr.event)
+						} else if xatr := maptoxml(extractattr(xb.Bytes())); len(xatr) > 0 {
+							endtag := ``
+							if mr.event == ENDTAG1 {
+								endtag = fmt.Sprintf(`</%s>`, mr.tag)
+							}
+							cb(fmt.Sprintf(`<%s>%s%s`, mr.tag, xatr, endtag), mr.event)
+						} else {
+							cb(xb.String(), mr.event)
+						}
 					}
 					xb.Reset()
 				default:

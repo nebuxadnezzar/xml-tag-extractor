@@ -28,7 +28,7 @@ func TestParseXMLChanWithData(t *testing.T) {
 	cb := DefaultCallback(writer, opts)
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
-	go func() { defer wg.Done(); ParseXMLChan(datach, errch, query, cb, true) }()
+	go func() { defer wg.Done(); ParseXMLChan(datach, errch, query, cb, opts) }()
 	cnt := 0
 	for {
 		s, err := reader.ReadString('\n')
@@ -67,7 +67,7 @@ func TestParseXMLChan(t *testing.T) {
 	cb := DefaultCallback(os.Stdout, NewOpts())
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
-	go func() { defer wg.Done(); ParseXMLChan(datach, errch, "a>b", cb, true) }()
+	go func() { defer wg.Done(); ParseXMLChan(datach, errch, "a>b", cb, NewOpts()) }()
 	datach <- []byte(xml)
 	datach <- []byte{}
 	close(datach)

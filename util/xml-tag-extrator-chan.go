@@ -5,8 +5,9 @@ import (
 	"fmt"
 )
 
-func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserCallback, nltospace bool) (TagMap, error) {
-
+func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserCallback, opts *Options) (TagMap, error) {
+	nltospace := opts.MakeOneLiner
+	//convertattr := opts.AttributesToElements
 	//defer close(errch)
 	xb := bytes.NewBuffer(nil) //xml buffer
 	st := NewPrefixstack()
