@@ -3,6 +3,9 @@ MAIN_NAME=cmd/main.go
 DIST=./dist
 FLAGS=-gcflags '-m'
 
+test-perf:
+	go test -count=1  -c ./util && util.test -test.count=1 -test.benchmem  -test.bench=. -test.cpuprofile cpu.prof -test.benchtime 1000s
+
 test-coverage:
 	go test -v -count=1 -coverprofile=cov.out ./...
 	go tool cover -html=cov.out
