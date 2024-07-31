@@ -13,7 +13,9 @@ func DefaultCallback(w io.Writer, opts *Options) ParserCallback {
 	o, _ := os.Stdout.Stat()
 	outtotty := (o.Mode()&os.ModeCharDevice) == os.ModeCharDevice || (o.Mode()&os.ModeNamedPipe) == os.ModeNamedPipe
 	return func(s string, evt EVENT) error {
-		w.Write([]byte(s))
+		if _, err := w.Write([]byte(s)); err != nil {
+			return err
+		}
 		if evt == ENDDOC {
 			cnt++
 			if !outtotty {
@@ -23,7 +25,9 @@ func DefaultCallback(w io.Writer, opts *Options) ParserCallback {
 					fmt.Fprintf(os.Stderr, "\r%c ", progressbytes[cnt%len(progressbytes)])
 				}
 			}
-			w.Write([]byte{'\n'})
+			if _, err := w.Write([]byte{'\n'}); err != nil {
+				return err
+			}
 		}
 		if evt == EOF {
 			if !outtotty && w != os.Stdout {
