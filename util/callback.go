@@ -13,6 +13,7 @@ func DefaultCallback(w io.Writer, opts *Options) ParserCallback {
 	o, _ := os.Stdout.Stat()
 	outtotty := (o.Mode()&os.ModeCharDevice) == os.ModeCharDevice || (o.Mode()&os.ModeNamedPipe) == os.ModeNamedPipe
 	return func(s string, evt EVENT) error {
+		//fmt.Printf("WRITING: %s\n", s)
 		if _, err := w.Write([]byte(s)); err != nil {
 			return err
 		}

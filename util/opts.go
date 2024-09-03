@@ -12,17 +12,20 @@ type Options struct {
 	// where root, greetings and hello are tags to be parsed out
 	XMLPaths string
 
+	// add root tag to resulting XML records
+	RootTagName string
+
 	// convert parsed out multiline XML document to one liner
 	MakeOneLiner bool
 
 	// convert attributes to elements
 	AttributesToElements bool
 
-	// add root tag to resulting XML records
-	RootTagName string
-
 	// show help
 	ShowHelp bool
+
+	// boost processing using buffered channels
+	Boost bool
 }
 
 func NewOpts() *Options {
@@ -40,7 +43,8 @@ func ParseArgs(args []string) *Options {
 	flag.StringVar(&rt, `rt`, ``, `add provided root tags to each document to make correct XML document`)
 	flag.StringVar(&rt, `root.tag`, ``, `add provided root tags to each document to make correct XML document`)
 
-	var ol, hl, ca bool
+	var ol, hl, ca, boost bool
+	flag.BoolVar(&boost, `boost`, false, `boost processing helps big file processing`)
 	flag.BoolVar(&ca, `ca`, false, `convert attributes to elements`)
 	flag.BoolVar(&ca, `convert.attributes`, false, `convert attributes to elements`)
 	flag.BoolVar(&ol, `ol`, false, `transform XML document into one-liner`)
@@ -55,6 +59,7 @@ func ParseArgs(args []string) *Options {
 	opts.MakeOneLiner = ol
 	opts.RootTagName = rt
 	opts.ShowHelp = hl
+	opts.Boost = boost
 	opts.Files = flag.Args()
 
 	return opts

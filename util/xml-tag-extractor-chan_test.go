@@ -8,7 +8,6 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"io"
 	"os"
 	"sync"
 	"testing"
@@ -22,13 +21,18 @@ func TestParseXMLChanWithData(t *testing.T) {
 	reader := bufio.NewReader(bytes.NewBuffer(filedata))
 	query := `CONSOLIDATED_LIST>INDIVIDUALS>INDIVIDUAL`
 	datach := make(chan []byte)
-	errch := make(chan error)
 	endl := []byte{}
 	opts := NewOpts()
 	cb := DefaultCallback(writer, opts)
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
-	go func() { defer wg.Done(); ParseXMLChan(datach, errch, query, cb, opts) }()
+	go func() {
+		defer wg.Done()
+		if _, e := ParseXMLChan(datach, query, cb, opts); e != nil {
+			t.Errorf("go routine failed with %v", e)
+			return
+		}
+	}()
 	cnt := 0
 	for {
 		s, err := reader.ReadString('\n')
@@ -43,16 +47,7 @@ func TestParseXMLChanWithData(t *testing.T) {
 	}
 	close(datach)
 
-	go func() {
-		for e := range errch {
-			fmt.Fprintf(os.Stderr, ">> %v\n", e)
-			if e != nil && e != io.EOF {
-				t.Errorf("failed with %v", e)
-			}
-		}
-		wg.Wait()
-		close(errch)
-	}()
+	wg.Wait()
 
 	if writer.Len() < 1 {
 		t.Errorf("no data written, check your source data and query")
@@ -62,23 +57,45 @@ func TestParseXMLChanWithData(t *testing.T) {
 
 func TestParseXMLChan(t *testing.T) {
 	xml := "<a>\n<b>hello\n</b>\n</a>"
+	cdata := `
+<root>
+ <a> <![CDATA[Some important data too]]>
+ </a>
+ <b> <![CDATA[select *
+              from table
+			  where time <silly >;
+    ]]> </b>
+ <b> some other info</b>
+</root>
+`
+	tests := []struct {
+		xml     string
+		xmlpath string
+	}{
+		{xml, "a>b"},
+		{cdata, "root>a"},
+		{cdata, "root>b"},
+	}
+	for _, test := range tests {
+		parsexml(t, test.xml, test.xmlpath)
+	}
+}
+
+func parsexml(t *testing.T, data string, xmlpath string) {
 	datach := make(chan []byte)
-	errch := make(chan error)
-	cb := DefaultCallback(os.Stdout, NewOpts())
+	opts := NewOpts()
+	opts.MakeOneLiner = false
+	cb := DefaultCallback(os.Stdout, opts)
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
-	go func() { defer wg.Done(); ParseXMLChan(datach, errch, "a>b", cb, NewOpts()) }()
-	datach <- []byte(xml)
-	datach <- []byte{}
-	close(datach)
-
 	go func() {
-		for e := range errch {
-			if e != nil && e != io.EOF {
-				t.Errorf("failed with %v", e)
-			}
+		defer wg.Done()
+		if _, e := ParseXMLChan(datach, xmlpath, cb, opts); e != nil {
+			t.Errorf("go routine failed with %v", e)
 		}
-		wg.Wait()
-		close(errch)
 	}()
+	datach <- []byte(data)
+	//datach <- []byte{}
+	close(datach)
+	wg.Wait()
 }

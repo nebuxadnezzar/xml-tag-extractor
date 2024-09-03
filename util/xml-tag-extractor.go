@@ -15,10 +15,12 @@ const MAXDOCSIZE = 32 * 1024 * 1024
 const (
 	PEEK EVENT = iota
 	MID
+	CDATA
 	ENDTAG1
 	ENDTAG2
 	ENDDOC
 	EOF
+	NOOP = -1
 )
 
 type TagMap map[string]int
@@ -147,4 +149,26 @@ func TagMapToStr(m TagMap) string {
 		buf.WriteString(fmt.Sprintf("%s\t\t%d\n", strings.Replace(strings.TrimRight(k, ">"), ">", ":", -1), m[k]))
 	}
 	return buf.String()
+}
+
+func (e EVENT) String() string {
+	switch e {
+	case PEEK:
+		return "PEEK"
+	case MID:
+		return "MID"
+	case CDATA:
+		return "CDATA"
+	case ENDTAG1:
+		return "ENDTAG1"
+	case ENDTAG2:
+		return "ENDTAG2"
+	case ENDDOC:
+		return "ENDDOC"
+	case EOF:
+		return "EOF"
+	case NOOP:
+		return "NOOP"
+	}
+	return ``
 }

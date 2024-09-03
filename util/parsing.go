@@ -8,19 +8,41 @@ import (
 )
 
 var (
-	STAG = regexp.MustCompile(`(?is)^\s*<\s*([\w\-\.]+)[^>]*?([/]?>)\s*$`)
+	STAG = regexp.MustCompile(`(?is)^\s*<([\w\-\.]+)[^>]*?([/]?>)\s*$`)
 	ETAG = regexp.MustCompile(`(?is)^\s*</([\w\-\.]+)[^>]*?>\s*$`)
 	ATTR = regexp.MustCompile(`(?is)\s+([\w\-]+)\s*=\s*"(.*?)"`)
+	CDST = regexp.MustCompile(`(?is)^\s*<!\[CDATA\[(.*?)\s*$`)      // CDATA prefix
+	CDAT = regexp.MustCompile(`(?is)^\s*<!\[CDATA\[(.*?)\]\]>\s*$`) // CDATA whole piece
+	CDET = regexp.MustCompile(`(?is)^(.*?)\]\]>\s*$`)               // CDATA closing tag
 )
 
 type matchResult struct {
-	tag     string
-	event   EVENT
-	matched bool
+	tag       string
+	event     EVENT
+	matched   bool
+	fullmatch bool
+}
+
+func matchcdata(b []byte) matchResult {
+	var mr matchResult
+	mr.event = NOOP
+	ary := [3]*regexp.Regexp{CDAT, CDST, CDET}
+	for i := range ary {
+		ma := ary[i].FindSubmatch(b)
+		if len(ma) > 0 {
+			mr.matched = true
+			mr.tag = string(ma[0])
+			mr.event = CDATA
+			mr.fullmatch = ary[i] == CDAT
+			return mr
+		}
+	}
+	return mr
 }
 
 func matchtag(b []byte) matchResult {
 	var mr matchResult
+	mr.event = NOOP
 	//fmt.Printf("MATCHING: %s %v\n", string(b), STAG.Match(b))
 	ma := STAG.FindSubmatch(b)
 	l := len(ma)
@@ -33,14 +55,12 @@ func matchtag(b []byte) matchResult {
 		}
 		return mr
 	}
-	for i, v := range ma {
-		fmt.Printf("\tT: %d %s\n", i, string(v))
-	}
 	return matchendtag(b)
 }
 
 func matchendtag(b []byte) matchResult {
 	var mr matchResult
+	mr.event = NOOP
 	//fmt.Printf("MATCHING: %s %v\n", string(b), ETAG.Match(b))
 	ma := ETAG.FindSubmatch(b)
 	l := len(ma)
@@ -50,6 +70,7 @@ func matchendtag(b []byte) matchResult {
 		mr.event = ENDTAG2
 		return mr
 	}
+	//return matchcdata(b)
 	return mr
 }
 
@@ -64,7 +85,6 @@ func extractattr(b []byte) map[string]string {
 		}
 	}
 	return m
-
 }
 
 func maptoxml(m map[string]string) string {

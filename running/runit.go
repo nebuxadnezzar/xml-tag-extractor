@@ -37,36 +37,37 @@ func Runit() {
 	if len(opts.Files) > 0 {
 		filename = opts.Files[0]
 	}
-	if len(pp) > 1 {
-		os.Exit(run1(filename, pp, opts))
-	} else {
-		os.Exit(run(filename, path, opts))
-	}
+	//if len(pp) > 1 {
+	os.Exit(run1(filename, pp, opts))
+	//} else {
+	//	os.Exit(run(filename, path, opts))
+	//}
 }
 
-func run(filename, path string, opts *util.Options) (status int) {
-	reader, err := util.GetReader(filename)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
-		return 2
-	}
-	defer util.CloseReader(reader, filename)
+/*
+	func run(filename, path string, opts *util.Options) (status int) {
+		reader, err := util.GetReader(filename)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
+			return 2
+		}
+		defer util.CloseReader(reader, filename)
 
-	printHeaderOrFooter(os.Stdout, filepath.Base(filename), opts, true)
+		printHeaderOrFooter(os.Stdout, filepath.Base(filename), opts, true)
 
-	tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout, opts), opts)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error creating tagmap: %v\n", err)
-		return 3
-	}
-	printHeaderOrFooter(os.Stdout, filename, opts, false)
-	if path == `` {
-		fmt.Printf("%s", util.TagMapToStr(tagmap))
-	}
-	return 0
+		tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout, opts), opts)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error creating tagmap: %v\n", err)
+			return 3
+		}
+		printHeaderOrFooter(os.Stdout, filename, opts, false)
+		if path == `` {
+			fmt.Printf("%s", util.TagMapToStr(tagmap))
+		}
+		return 0
 
 }
-
+*/
 func run1(filename string, pp []string, opts *util.Options) (status int) {
 	reader, err := util.GetReader(filename)
 	if err != nil {
@@ -86,12 +87,16 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 		return 1
 	}
 
+	chnum := 1
+	if opts.Boost {
+		chnum = 24
+	}
+
 	rd := bufio.NewReader(reader)
 	wg := new(sync.WaitGroup)
-	errch := make(chan error)
 	datachs := make([]chan []byte, len(pp))
 	for i := range datachs {
-		datachs[i] = make(chan []byte, 16)
+		datachs[i] = make(chan []byte, chnum)
 	}
 
 	for i, p := range pp {
@@ -101,20 +106,15 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 			//println("subpath", path)
 			cb := util.DefaultCallback(wa[ii], o)
 
-			if tagmap, err := util.ParseXMLChan(datach, errch, path, cb, opts); err == nil {
+			if tagmap, err := util.ParseXMLChan(datach, path, cb, opts); err == nil {
 				if path == `` {
 					fmt.Println(util.TagMapToStr(tagmap))
 				}
+			} else {
+				fmt.Fprintf(os.Stderr, "routine %d returned error %v\n", ii, err)
 			}
 		}(p, i, datachs[i], opts)
 	}
-	go func() {
-		for e := range errch {
-			fmt.Fprintf(os.Stderr, ">> %v\n", e)
-		}
-		wg.Wait()
-		close(errch)
-	}()
 
 	cnt := 0
 	for {
@@ -123,10 +123,9 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 		if len(s) > 0 {
 			//fmt.Printf("%05d %d Sending [%s]", cnt, len(datachs), s)
 			for i, k := 0, len(datachs); i < k; i++ {
-				ch := datachs[i]
-				//print(cnt, " channeling", s)
-				ch <- []byte(s)
-				ch <- []byte{}
+				//ch := datachs[i]
+				datachs[i] <- []byte(s)
+				//ch <- []byte{}
 			}
 		}
 		if err != nil {
@@ -137,9 +136,18 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 		}
 	}
 
-	for _, ch := range datachs {
-		close(ch)
+	// give a pause to drain buffered channels
+	if opts.Boost {
+		time.Sleep(100 * time.Millisecond)
 	}
+	for i, ch := range datachs {
+		close(ch)
+		for range ch {
+			d := <-ch
+			fmt.Fprintf(os.Stderr, "channel %d still has buffer: [%s]\n", i, string(d))
+		}
+	}
+	wg.Wait()
 
 	tmpnames := make([]string, 0, len(pp))
 	for _, w := range wa {

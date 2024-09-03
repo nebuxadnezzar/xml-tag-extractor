@@ -26,3 +26,5 @@ todo.txt
 # Go workspace file
 go.work
 go.work.sum
+.vscode
+util/debug.go

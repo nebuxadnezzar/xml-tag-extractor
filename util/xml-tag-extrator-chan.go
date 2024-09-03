@@ -5,10 +5,8 @@ import (
 	"fmt"
 )
 
-func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserCallback, opts *Options) (TagMap, error) {
-	nltospace := opts.MakeOneLiner
-	//convertattr := opts.AttributesToElements
-	//defer close(errch)
+func ParseXMLChan(datach chan []byte, query string, cb ParserCallback, opts *Options) (TagMap, error) {
+
 	xb := bytes.NewBuffer(nil) //xml buffer
 	st := NewPrefixstack()
 	writeflag := false
@@ -29,14 +27,24 @@ func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserC
 				b := buf[i]
 				switch b {
 				case '\n', '\r':
-					if nltospace {
+					if opts.MakeOneLiner {
 						xb.WriteByte(0x20)
 					} else {
 						xb.WriteByte(b)
 					}
 				case '<':
 					if xb.Len() > 0 {
+						mr := matchcdata(xb.Bytes())
+						if mr.matched {
+							//println(fmt.Sprintf("M1 CDATA EVT: %s %s", mr.event.String(), mr.tag))
+							xb.WriteByte(b)
+							continue
+						}
 						//fmt.Printf("-> %s\n", xb.String())
+						//if bytes.Contains(xb.Bytes(), []byte(`<![CDATA[`)) {
+						//fmt.Printf("CDATA OUTSIDE OF CDATA EVENT: %s\n", xb.String())
+						//continue
+						//}
 						if writeflag && cb != nil {
 							cb(xb.String(), PEEK)
 						}
@@ -46,10 +54,12 @@ func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserC
 				case '>':
 					xb.WriteByte(b)
 					mr := matchtag(xb.Bytes())
-					//fmt.Printf("\n--> %s\n", xb.String())
+					//fmt.Printf("\n--> MR: %#v %s %v %s\n", mr, mr.event.String(), writeflag, xb.String())
 					if mr.matched {
 						prefix := st.String() + ">"
 						switch mr.event {
+						case CDATA:
+							writeflag = oktowrite(prefix, path, mr.tag, mr.event)
 						case MID:
 							st.Push(mr.tag)
 							prefix = st.String() + ">"
@@ -67,25 +77,42 @@ func ParseXMLChan(datach chan []byte, errch chan error, query string, cb ParserC
 						if prefix == path && mr.event == ENDTAG2 {
 							mr.event = ENDDOC
 						}
+					} else {
+						mr = matchcdata(xb.Bytes())
+						if mr.matched {
+							//println(fmt.Sprintf("M2 CDATA EVT: %s %s %v", mr.event.String(), mr.tag, mr.fullmatch))
+							if !mr.fullmatch {
+								continue
+							}
+						}
 					}
 
-					//fmt.Printf("STACK: %s %v\n", st.String(), writeflag)
+					//fmt.Printf("STACK: %s %s %v %s\n", st.String(), mr.event.String(), writeflag, xb.String())
 					if writeflag && cb != nil {
-						if err := cb(xb.String(), mr.event); err != nil {
-							errch <- err
-							return nil, fmt.Errorf("error from XML parsing callback %w", err)
+						if !opts.AttributesToElements || mr.event == ENDDOC {
+							if err := cb(xb.String(), mr.event); err != nil {
+								return nil, fmt.Errorf("error from XML parsing callback %w", err)
+							}
+						} else if xatr := maptoxml(extractattr(xb.Bytes())); len(xatr) > 0 {
+							endtag := ``
+							if mr.event == ENDTAG1 {
+								endtag = fmt.Sprintf(`</%s>`, mr.tag)
+							}
+							if err := cb(fmt.Sprintf(`<%s>%s%s`, mr.tag, xatr, endtag), mr.event); err != nil {
+								return nil, fmt.Errorf("error from XML parsing callback %w", err)
+							}
+						} else {
+							if err := cb(xb.String(), mr.event); err != nil {
+								return nil, fmt.Errorf("error from XML parsing callback %w", err)
+							}
 						}
-
-						//if mr.event == MID || mr.event == ENDTAG1 {
-						//	extractattr(xb.Bytes())
-						//}
 					}
 					xb.Reset()
 				default:
 					xb.WriteByte(b)
 					if xb.Len() > MAXDOCSIZE {
 						err := fmt.Errorf("max. document size %d exceeded for path: %d %s", MAXDOCSIZE, xb.Len(), st.String())
-						errch <- err
+						//errch <- err
 						return tagmap, err
 					}
 				}
