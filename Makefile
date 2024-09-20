@@ -13,21 +13,24 @@ test-coverage:
 run:
 	go run ${MAIN_NAME} $(arg1)
 
-build:
-	GOARCH=amd64 GOOS=darwin go build ${FLAGS} -o ${DIST}-darwin/${BINARY_NAME} ${MAIN_NAME}
-	GOARCH=amd64 GOOS=linux go build ${FLAGS} -o ${DIST}-linux/${BINARY_NAME} ${MAIN_NAME}
+build-windows: clean
+	@[ -d $(DIST)-windows ] || mkdir -p $(DIST)-windows
 	GOARCH=amd64 GOOS=windows go build ${FLAGS} -o ${DIST}-windows/${BINARY_NAME}.exe ${MAIN_NAME}
 
+build: deps
+	go build ${FLAGS} -o ${DIST}/${BINARY_NAME} ${MAIN_NAME}
+
+build-static: deps
+	CGO_ENABLED=0 go build -o ${DIST}/${BINARY_NAME} -a -ldflags="-w -extldflags" ${MAIN_NAME}
+
 deps:
-	@[ -d $(DIST)-linux ] || mkdir -p $(DIST)-linux
-	@[ -d $(DIST)-darwin ] || mkdir -p $(DIST)-darwin
-	@[ -d $(DIST)-windows ] || mkdir -p $(DIST)-windows
+	@[ -d $(DIST) ] || mkdir -p $(DIST)
 
 clean:
 	@rm -rf ${DIST}*
 	@-rm -f *.pprof *.prof *.test *.out
 
-all: deps build
+all: clean deps build
 
 # utility for printing variables
 print-% : ; @echo $($*)

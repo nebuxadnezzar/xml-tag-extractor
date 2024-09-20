@@ -10,7 +10,7 @@
 *.swp
 *.prof
 *.pprof
-dump.txt
+dump*.txt
 # Test binary, built with `go test -c`
 *.test
 
@@ -20,7 +20,7 @@ coverage.html
 
 # Dependency directories (remove the comment below to include it)
 vendor/
-dist-*
+dist*
 todo.txt
 
 # Go workspace file

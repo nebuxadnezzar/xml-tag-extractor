@@ -21,7 +21,7 @@ func Runit() {
 	if len(os.Args) > 1 {
 		opts = util.ParseArgs(os.Args[1:])
 	}
-	fmt.Fprintf(os.Stderr, "OPTS: %#v\n", opts)
+	//fmt.Fprintf(os.Stderr, "OPTS: %#v\n", opts)
 
 	if opts.ShowHelp {
 		showUsageAndExit()
@@ -30,44 +30,15 @@ func Runit() {
 	if opts.XMLPaths != `` {
 		path = strings.Replace(opts.XMLPaths, ":", ">", -1)
 	}
-	fmt.Fprintf(os.Stderr, "PATH: %s\n", path)
 	pp := strings.Split(path, ",")
 
 	filename := os.Stdin.Name()
 	if len(opts.Files) > 0 {
 		filename = opts.Files[0]
 	}
-	//if len(pp) > 1 {
 	os.Exit(run1(filename, pp, opts))
-	//} else {
-	//	os.Exit(run(filename, path, opts))
-	//}
 }
 
-/*
-	func run(filename, path string, opts *util.Options) (status int) {
-		reader, err := util.GetReader(filename)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error opening: %s %v\n", os.Args[1], err)
-			return 2
-		}
-		defer util.CloseReader(reader, filename)
-
-		printHeaderOrFooter(os.Stdout, filepath.Base(filename), opts, true)
-
-		tagmap, err := util.ParseXML(reader, path, util.DefaultCallback(os.Stdout, opts), opts)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error creating tagmap: %v\n", err)
-			return 3
-		}
-		printHeaderOrFooter(os.Stdout, filename, opts, false)
-		if path == `` {
-			fmt.Printf("%s", util.TagMapToStr(tagmap))
-		}
-		return 0
-
-}
-*/
 func run1(filename string, pp []string, opts *util.Options) (status int) {
 	reader, err := util.GetReader(filename)
 	if err != nil {
@@ -103,12 +74,11 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 		wg.Add(1)
 		go func(path string, ii int, datach chan []byte, o *util.Options) {
 			defer wg.Done()
-			//println("subpath", path)
 			cb := util.DefaultCallback(wa[ii], o)
 
 			if tagmap, err := util.ParseXMLChan(datach, path, cb, opts); err == nil {
 				if path == `` {
-					fmt.Println(util.TagMapToStr(tagmap))
+					fmt.Printf("\n%s\n", util.TagMapToStr(tagmap))
 				}
 			} else {
 				fmt.Fprintf(os.Stderr, "routine %d returned error %v\n", ii, err)
@@ -117,15 +87,18 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 	}
 
 	cnt := 0
+	totalbytes := 0
+	xmlPathNotPresent := opts.XMLPaths == ``
 	for {
-		s, err := rd.ReadString('\n')
+		s, err := rd.ReadString('>')
 		cnt++
 		if len(s) > 0 {
-			//fmt.Printf("%05d %d Sending [%s]", cnt, len(datachs), s)
+			if xmlPathNotPresent {
+				totalbytes += len(s)
+				fmt.Fprintf(os.Stderr, "\rbytes read: %d", totalbytes)
+			}
 			for i, k := 0, len(datachs); i < k; i++ {
-				//ch := datachs[i]
 				datachs[i] <- []byte(s)
-				//ch <- []byte{}
 			}
 		}
 		if err != nil {
@@ -137,14 +110,15 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 	}
 
 	// give a pause to drain buffered channels
-	if opts.Boost {
-		time.Sleep(100 * time.Millisecond)
-	}
+	time.Sleep(100 * time.Millisecond)
+
 	for i, ch := range datachs {
 		close(ch)
 		for range ch {
 			d := <-ch
-			fmt.Fprintf(os.Stderr, "channel %d still has buffer: [%s]\n", i, string(d))
+			if len(d) > 0 {
+				fmt.Fprintf(os.Stderr, "channel %d still has buffer: [%s]\n", i, string(d))
+			}
 		}
 	}
 	wg.Wait()
@@ -157,7 +131,7 @@ func run1(filename string, pp []string, opts *util.Options) (status int) {
 	total, err := util.MergeFiles(tmpnames, os.Stdout)
 	printHeaderOrFooter(os.Stdout, filepath.Base(filename), opts, false)
 
-	fmt.Fprintf(os.Stderr, "\ntotal bytes: %d\n", total)
+	fmt.Fprintf(os.Stderr, "\nbytes merged: %d\n", total)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "copy error: %v\n", err)
 	}
@@ -182,9 +156,3 @@ func printHeaderOrFooter(w io.Writer, source string, opts *util.Options, isheade
 		}
 	}
 }
-
-/*
-
-go run cmd/main.go ~/test-data/consolidated.xml CONSOLIDATED_LIST:INDIVIDUALS:INDIVIDUAL,CONSOLIDATED_LIST:ENTITIES:ENTITY >
-
-*/

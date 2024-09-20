@@ -43,7 +43,6 @@ func matchcdata(b []byte) matchResult {
 func matchtag(b []byte) matchResult {
 	var mr matchResult
 	mr.event = NOOP
-	//fmt.Printf("MATCHING: %s %v\n", string(b), STAG.Match(b))
 	ma := STAG.FindSubmatch(b)
 	l := len(ma)
 	if l > 0 {
@@ -61,7 +60,6 @@ func matchtag(b []byte) matchResult {
 func matchendtag(b []byte) matchResult {
 	var mr matchResult
 	mr.event = NOOP
-	//fmt.Printf("MATCHING: %s %v\n", string(b), ETAG.Match(b))
 	ma := ETAG.FindSubmatch(b)
 	l := len(ma)
 	mr.matched = l > 0
@@ -70,18 +68,15 @@ func matchendtag(b []byte) matchResult {
 		mr.event = ENDTAG2
 		return mr
 	}
-	//return matchcdata(b)
 	return mr
 }
 
 func extractattr(b []byte) map[string]string {
-	//fmt.Printf("\nEXTRACTING ATTR: %s\n", string(b))
 	m := map[string]string{}
 	ma := ATTR.FindAllSubmatch(b, -1)
 	for _, v := range ma {
 		if len(v) > 2 {
 			m[string(v[1])] = string(v[2])
-			//fmt.Printf(" %s ->  %s\n", string(v[1]), string(v[2]))
 		}
 	}
 	return m
@@ -99,18 +94,15 @@ func maptoxml(m map[string]string) string {
 }
 
 func CreateOneLiner(s string) []byte {
-	//fmt.Printf("s %s\n", s)
 	b := []byte(s)
 	i := 0
 	for j, k := 0, len(b); i < k && i+j < k; {
 		offset := i + j
 		ch := b[offset]
-		//fmt.Printf("[%c] ", ch)
 		switch ch {
 		case '\n', '\r':
 			if offset+1 < k {
 				ch := rune(b[offset+1])
-				// if line break is followed by alnum replace it with space (0x20)
 				if unicode.IsLetter(ch) || unicode.IsDigit(ch) {
 					b[offset] = ' '
 					goto SKIP
@@ -123,6 +115,5 @@ func CreateOneLiner(s string) []byte {
 		b[i] = b[offset]
 		i++
 	}
-	//fmt.Printf("I: %d\n", i)
 	return b[:i]
 }

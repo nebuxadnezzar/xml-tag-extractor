@@ -8,7 +8,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"os"
+	"io"
 	"sync"
 	"testing"
 )
@@ -16,12 +16,32 @@ import (
 //go:embed data/consolidated.xml
 var filedata []byte
 
+func TestTagMapString(t *testing.T) {
+	s := TagMapToStr(TagMap{"hi": 2})
+	t.Logf("S: %s\n", s)
+	if s == `` {
+		t.Error("expected non-empty string")
+	}
+}
+
+func TestEventToStr(t *testing.T) {
+
+	if len(PEEK.String()) == 0 ||
+		len(MID.String()) == 0 ||
+		len(CDATA.String()) == 0 ||
+		len(ENDTAG1.String()) == 0 ||
+		len(ENDTAG2.String()) == 0 ||
+		len(ENDDOC.String()) == 0 ||
+		len(EOF.String()) == 0 {
+		t.Error("expected non-empty string")
+	}
+}
+
 func TestParseXMLChanWithData(t *testing.T) {
 	writer := bytes.NewBuffer(nil)
 	reader := bufio.NewReader(bytes.NewBuffer(filedata))
 	query := `CONSOLIDATED_LIST>INDIVIDUALS>INDIVIDUAL`
 	datach := make(chan []byte)
-	endl := []byte{}
 	opts := NewOpts()
 	cb := DefaultCallback(writer, opts)
 	wg := new(sync.WaitGroup)
@@ -38,12 +58,10 @@ func TestParseXMLChanWithData(t *testing.T) {
 		s, err := reader.ReadString('\n')
 		cnt++
 		if err != nil {
-			fmt.Printf("line# %d loop err: %v\n", cnt, err)
+			fmt.Printf("--> line# %d loop err: %v\n", cnt, err)
 			break
 		}
-		//println("sending", s)
 		datach <- []byte(s)
-		datach <- endl
 	}
 	close(datach)
 
@@ -76,16 +94,18 @@ func TestParseXMLChan(t *testing.T) {
 		{cdata, "root>a"},
 		{cdata, "root>b"},
 	}
+	buf := bytes.NewBuffer(nil)
 	for _, test := range tests {
-		parsexml(t, test.xml, test.xmlpath)
+		parsexml(t, buf, test.xml, test.xmlpath)
 	}
+	println(fmt.Sprintf("\n%s\n", buf.String()))
 }
 
-func parsexml(t *testing.T, data string, xmlpath string) {
+func parsexml(t *testing.T, w io.Writer, data string, xmlpath string) {
 	datach := make(chan []byte)
 	opts := NewOpts()
 	opts.MakeOneLiner = false
-	cb := DefaultCallback(os.Stdout, opts)
+	cb := DefaultCallback(w, opts)
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 	go func() {
@@ -95,7 +115,6 @@ func parsexml(t *testing.T, data string, xmlpath string) {
 		}
 	}()
 	datach <- []byte(data)
-	//datach <- []byte{}
 	close(datach)
 	wg.Wait()
 }

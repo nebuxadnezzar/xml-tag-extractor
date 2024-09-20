@@ -2,8 +2,30 @@
 Extracts a XML document between a set of tags and transforms it into single line document
 
 ### Command line
-```bash
-xte path-to-xml-file [tag-path]
+```text
+
+Usage: xte [OPTIONS] XML-file-path
+OPTIONS:
+  -boost
+    	boost processing, helps big file processing
+  -ca
+  -convert.attributes
+    	convert attributes to elements
+  -h
+  -help
+    	show help
+  -ol
+  -one.liner
+    	transform XML document into one-liner
+
+  -rt string
+  -root.tag string
+    	add provided root tags to each document to make correct XML document
+
+  -xp string
+  -xml.paths string
+    	CSV list of paths to tag(s) to extract, i.e. root:greeting OR root:greetings,root:story
+
 ```
 ### Examples
 given this file
@@ -18,7 +40,7 @@ given this file
 ```
 ... to extract ```greetings``` tags together with its content use command
 ```bash
-xte my.xml root:greetings
+xte -ol -xp root:greetings my.xml
 ```
 the output will be one-document-per-line records
 ```xml
@@ -28,19 +50,7 @@ the output will be one-document-per-line records
 ```
 to extract ```times``` tags together with its content use command
 ```bash
-xte my.xml root:greetings:times
-```
-the output will be one-document-per-line records
-```xml
-<times>3</times>
-```
-to extract ```smiles``` tags together with its content use command
-```bash
-xte my.xml root:smiles
-```
-the output will be one-document-per-line records
-```xml
-<smiles>wide</smiles>
+xte xte -ol -xp root:greetings:times my.xml
 ```
 
 if not __tag-path__ argument provided __xte__ will print all tag paths and their count found in an XML file which can be useful, if you have huge file and don't know XML structure of the file.

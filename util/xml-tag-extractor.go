@@ -3,7 +3,6 @@ package util
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"sort"
 	"strings"
 )
@@ -26,96 +25,6 @@ const (
 type TagMap map[string]int
 
 type ParserCallback func(string, EVENT) error
-
-func ParseXML(reader io.Reader, query string, cb ParserCallback, opts *Options) (TagMap, error) {
-	nltospace := opts.MakeOneLiner
-	buf := make([]byte, 4096)
-	xb := bytes.NewBuffer(nil) //xml buffer
-	st := NewPrefixstack()
-	writeflag := false
-	tagmap := map[string]int{}
-	path := query + ">"
-
-	for {
-		n, err := reader.Read(buf)
-		//fmt.Fprintf(os.Stderr, "N: %d\n", n)
-		if n > 0 {
-			for i := 0; i < n; i++ {
-				b := buf[i]
-				switch b {
-				case '\n', '\r':
-					if nltospace {
-						xb.WriteByte(0x20)
-					} else {
-						xb.WriteByte(b)
-					}
-				case '<':
-					if xb.Len() > 0 {
-						//fmt.Printf("-> %s\n", xb.String())
-						if writeflag && cb != nil {
-							cb(xb.String(), PEEK)
-						}
-					}
-					xb.Reset()
-					xb.WriteByte(b)
-				case '>':
-					xb.WriteByte(b)
-					mr := matchtag(xb.Bytes())
-					//fmt.Printf("\n--> %s\n", xb.String())
-					if mr.matched {
-						prefix := st.String() + ">"
-						switch mr.event {
-						case MID:
-							st.Push(mr.tag)
-							prefix = st.String() + ">"
-							writeflag = oktowrite(prefix, path, mr.tag, mr.event)
-							updatemap(tagmap, prefix)
-						case ENDTAG2:
-							writeflag = oktowrite(prefix, path, mr.tag, mr.event)
-							st.Pop()
-						case ENDTAG1:
-							writeflag = oktowrite(prefix, path, mr.tag, mr.event)
-							//fmt.Fprintf(os.Stderr, "ok %v prefix: %s path: %s\n", writeflag, prefix, path)
-							updatemap(tagmap, fmt.Sprintf("%s%s>", prefix, mr.tag))
-						}
-
-						if prefix == path && mr.event == ENDTAG2 {
-							mr.event = ENDDOC
-						}
-					}
-
-					//fmt.Printf("STACK: %s %v\n", st.String(), writeflag)
-					if writeflag && cb != nil {
-						if !opts.AttributesToElements || mr.event == ENDDOC {
-							cb(xb.String(), mr.event)
-						} else if xatr := maptoxml(extractattr(xb.Bytes())); len(xatr) > 0 {
-							endtag := ``
-							if mr.event == ENDTAG1 {
-								endtag = fmt.Sprintf(`</%s>`, mr.tag)
-							}
-							cb(fmt.Sprintf(`<%s>%s%s`, mr.tag, xatr, endtag), mr.event)
-						} else {
-							cb(xb.String(), mr.event)
-						}
-					}
-					xb.Reset()
-				default:
-					xb.WriteByte(b)
-				}
-			}
-		}
-		if err != nil {
-			if err != io.EOF {
-				return nil, fmt.Errorf("%w", err)
-			}
-			if cb != nil {
-				cb(``, EOF)
-			}
-			break
-		}
-	}
-	return tagmap, nil
-}
 
 func updatemap(m map[string]int, tag string) {
 	if _, ok := m[tag]; ok {
